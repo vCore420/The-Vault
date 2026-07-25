@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>The Vault</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+<div id="app">
+  <canvas id="render-canvas"></canvas>
+  <div id="vignette"></div>
+
+  <!-- HUD -->
+  <div id="hud">
+    <div id="crosshair"></div>
+    <div id="prompt-pill"></div>
+    <div id="progress-plaque" class="ledger-card"><span class="num" id="progress-num">0 / 0</span><span class="lbl">unlocked</span></div>
+    <div id="top-right-controls">
+      <button id="reset-btn" title="New vault" aria-label="Start a new vault">&#8635;</button>
+      <button id="mute-btn" title="Mute sound" aria-label="Toggle sound">&#9835;</button>
+    </div>
+    <div id="inspect-banner">Inspecting &mdash; drag to rotate</div>
+  </div>
+
+  <!-- mobile controls -->
+  <div id="mobile-controls">
+    <div id="joystick-zone">
+      <div id="joystick-base"><div id="joystick-knob"></div></div>
+    </div>
+    <div id="look-zone"></div>
+    <div id="mobile-buttons">
+      <div class="mobile-btn" id="drop-btn">Drop</div>
+      <div class="mobile-btn" id="inspect-btn">Inspect</div>
+      <div class="mobile-btn" id="interact-btn">Use</div>
+    </div>
+  </div>
+
+  <!-- start screen -->
+  <div id="start-screen" class="screen-overlay">
+    <div class="title-card ledger-card">
+      <p class="title-eyebrow">Est. — a quiet hour underground</p>
+      <h1 class="title-main">The Vault</h1>
+      <p class="title-sub">Somewhere below the old bank, a room full of locked boxes is waiting. Every key fits exactly one lock. Look closely, and open what you find.</p>
+      <div class="title-divider"></div>
+      <div class="controls-hint" id="controls-hint"></div>
+      <div class="start-actions">
+        <button class="brass-btn" id="begin-btn">Enter the Vault</button>
+        <button class="brass-btn ghost hidden" id="continue-btn">Continue Vault</button>
+      </div>
+      <div id="loading-line"></div>
+    </div>
+  </div>
+
+  <!-- reward modal -->
+  <div id="reward-modal">
+    <div class="reward-card ledger-card">
+      <div class="reward-seal" id="reward-seal">&#10022;</div>
+      <p class="reward-eyebrow" id="reward-eyebrow">Box No. 1</p>
+      <h2 class="reward-name" id="reward-name">Item</h2>
+      <p class="reward-desc" id="reward-desc"></p>
+      <p class="reward-env hidden" id="reward-env"></p>
+      <button class="brass-btn" id="reward-continue-btn">Continue</button>
+    </div>
+  </div>
+
+  <!-- win screen -->
+  <div id="win-screen" class="screen-overlay hidden">
+    <div class="title-card ledger-card">
+      <p class="title-eyebrow">Every box, opened</p>
+      <h1 class="title-main" style="font-size:40px;">The Vault is Complete</h1>
+      <p class="title-sub">The room has settled into something warmer than when you found it.</p>
+      <div id="win-stats">
+        <div><div class="v" id="win-count">0</div><div class="l">Boxes</div></div>
+        <div><div class="v" id="win-time">0:00</div><div class="l">Time</div></div>
+      </div>
+      <div class="start-actions">
+        <button class="brass-btn" id="new-vault-btn">Begin a New Vault</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- settings modal -->
+  <div id="settings-modal" class="screen-overlay hidden">
+    <div class="title-card ledger-card settings-card">
+      <p class="title-eyebrow">Configure</p>
+      <h1 class="title-main" style="font-size:32px;">Vault Settings</h1>
+      <div id="settings-fields"></div>
+      <div class="start-actions">
+        <button class="brass-btn ghost" id="settings-randomize-btn">Randomize</button>
+        <button class="brass-btn" id="settings-begin-btn">Begin</button>
+      </div>
+      <button class="brass-btn ghost" id="settings-cancel-btn" style="margin-top:12px;">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/utils.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/generator.js"></script>
+<script src="js/textures.js"></script>
+<script src="js/world.js"></script>
+<script src="js/player.js"></script>
+<script src="js/interaction.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/save.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
