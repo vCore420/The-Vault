@@ -69,7 +69,7 @@ const Game = (() => {
       onInspectDrag: (dx, dy) => interaction.onInspectDrag(dx, dy),
       onInspectStart: () => interaction.startInspect(),
       onInspectEnd: () => interaction.endInspect(),
-      onDrop: () => interaction.dropHeldKey(),
+      onDrop: () => interaction.toggleDrop(),
       onFirstInput: () => audio.resume()
     });
 

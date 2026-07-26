@@ -31,6 +31,7 @@ class VaultWorld {
     this._buildClock();
     this._buildStarterDecor();
     this._buildKeyTable();
+    this._buildSortingTable(-3.2, ROOM.d/2 - 0.55, 0);
     this._buildBoxWall();
     this._buildScatteredContainers();
     this._buildMementoShelf();
@@ -705,6 +706,60 @@ class VaultWorld {
     }
 
     return group;
+  }
+
+  // An empty, plain utility table with a few shallow trays — unlike the key
+  // table, nothing starts here. It exists purely so the player has somewhere
+  // deliberate to sort keys into once they can position-and-place them.
+  _buildSortingTable(x, z, rotY){
+    const group = new THREE.Group();
+    const tableW = 1.3, tableD = 0.6, tableH = 0.78;
+    const plainWood = new THREE.MeshStandardMaterial({ map: Textures.woodTexture(0x3f2a19, 0x241608, {repeat:[2,1]}), roughness:0.7, metalness:0.03 });
+
+    const top = new THREE.Mesh(new THREE.BoxGeometry(tableW, 0.05, tableD), plainWood);
+    top.position.y = tableH;
+    group.add(top);
+    const apron = new THREE.Mesh(new THREE.BoxGeometry(tableW-0.1, 0.06, tableD-0.14), plainWood);
+    apron.position.y = tableH - 0.08;
+    group.add(apron);
+    const legGeo = new THREE.CylinderGeometry(0.025, 0.03, tableH-0.05, 8);
+    [[-tableW/2+0.09,-tableD/2+0.09],[-tableW/2+0.09,tableD/2-0.09],[tableW/2-0.09,-tableD/2+0.09],[tableW/2-0.09,tableD/2-0.09]].forEach(([lx,lz]) => {
+      const leg = new THREE.Mesh(legGeo, plainWood);
+      leg.position.set(lx, (tableH-0.05)/2, lz);
+      group.add(leg);
+    });
+
+    const trayMat = new THREE.MeshStandardMaterial({ color:0x5c5244, roughness:0.92, metalness:0.02 });
+    const trayCount = 3;
+    const trayW = 0.34, trayD = 0.44, trayWallH = 0.032;
+    const trayY = tableH + 0.025;
+    for(let i=0;i<trayCount;i++){
+      const tx = -tableW/2 + (tableW/(trayCount+1)) * (i+1);
+      const trayBase = new THREE.Mesh(new THREE.BoxGeometry(trayW, 0.012, trayD), trayMat);
+      trayBase.position.set(tx, trayY, 0);
+      group.add(trayBase);
+      const wallSide = new THREE.BoxGeometry(0.012, trayWallH, trayD);
+      const wallL = new THREE.Mesh(wallSide, trayMat);
+      wallL.position.set(tx-trayW/2, trayY+trayWallH/2, 0);
+      group.add(wallL);
+      const wallR = new THREE.Mesh(wallSide, trayMat);
+      wallR.position.set(tx+trayW/2, trayY+trayWallH/2, 0);
+      group.add(wallR);
+      const wallEnd = new THREE.BoxGeometry(trayW+0.024, trayWallH, 0.012);
+      const wallF = new THREE.Mesh(wallEnd, trayMat);
+      wallF.position.set(tx, trayY+trayWallH/2, -trayD/2);
+      group.add(wallF);
+      const wallBk = new THREE.Mesh(wallEnd, trayMat);
+      wallBk.position.set(tx, trayY+trayWallH/2, trayD/2);
+      group.add(wallBk);
+    }
+
+    group.position.set(x, 0, z);
+    group.rotation.y = rotY;
+    this.root.add(group);
+    // generous, rotation-agnostic footprint — simpler and safer than computing
+    // an exact rotated bounding box for a piece of static furniture
+    this._addObstacle(x-0.75, x+0.75, z-0.75, z+0.75);
   }
 
   // ------------------------------------------------------------- box wall

@@ -8,7 +8,7 @@ class UIManager{
     this.audio = audio;
     this.el = {};
     ['hud','crosshair','prompt-pill','progress-plaque','progress-num',
-     'inspect-banner','start-screen','begin-btn','continue-btn','controls-hint',
+     'inspect-banner','position-banner','start-screen','begin-btn','continue-btn','controls-hint',
      'loading-line','reward-modal','reward-seal','reward-eyebrow','reward-name','reward-desc','reward-env',
      'reward-continue-btn','win-screen','win-count','win-time','new-vault-btn','mobile-controls','interact-btn',
      'inspect-btn','drop-btn','reset-btn','mute-btn',
@@ -27,9 +27,9 @@ class UIManager{
 
   controlsHintText(){
     if(Utils.isTouchDevice()){
-      return '<b>Left joystick</b> to move &middot; <b>swipe</b> to look<br><b>Use</b> to interact &middot; <b>Inspect</b> to rotate a held key &middot; <b>Drop</b> to set it down';
+      return '<b>Left joystick</b> to move &middot; <b>swipe</b> to look<br><b>Use</b> to interact &middot; <b>Inspect</b> to rotate a held key<br><b>Drop</b> once to aim, again to set it down';
     }
-    return '<b>WASD</b> to move &middot; <b>mouse</b> to look<br><b>Click</b> to interact &middot; <b>right-click + drag</b> to inspect &middot; <b>G</b> to drop a held key';
+    return '<b>WASD</b> to move &middot; <b>mouse</b> to look<br><b>Click</b> to interact &middot; <b>right-click + drag</b> to inspect<br><b>G</b> once to aim a held key, again to set it down';
   }
 
   showStart(hasSave){
@@ -56,6 +56,10 @@ class UIManager{
   setInspecting(on){
     this.el['inspect-banner'].classList.toggle('show', !!on);
     this.el['inspect-btn'].classList.toggle('on', !!on);
+  }
+  setPositioning(on){
+    this.el['position-banner'].classList.toggle('show', !!on);
+    this.el['drop-btn'].classList.toggle('on', !!on);
   }
 
   updateProgress(count, total){
@@ -96,7 +100,7 @@ class UIManager{
     this.el['interact-btn'].addEventListener('touchstart', startInteract, { passive:false });
     this.el['interact-btn'].addEventListener('touchend', endInteract);
     this.el['inspect-btn'].addEventListener('touchstart', e => { e.preventDefault(); interaction.toggleInspect(); }, { passive:false });
-    this.el['drop-btn'].addEventListener('touchstart', e => { e.preventDefault(); audio.resume(); interaction.dropHeldKey(); }, { passive:false });
+    this.el['drop-btn'].addEventListener('touchstart', e => { e.preventDefault(); audio.resume(); interaction.toggleDrop(); }, { passive:false });
   }
 
   // Opening the settings panel *is* the confirmation step — nothing destructive

@@ -17,6 +17,7 @@ class InteractionSystem{
     this.raycaster.far = MAX_INTERACT_DISTANCE;
     this.heldKeyId = null;
     this.inspecting = false;
+    this.positioning = false;
     this.openedCount = 0;
     this.openedOrder = [];
     this.onProgress = null;
@@ -29,6 +30,7 @@ class InteractionSystem{
     this.world = world;
     this.heldKeyId = null;
     this.inspecting = false;
+    this.positioning = false;
     this.openedCount = 0;
     this.openedOrder = [];
     this.currentHoverTarget = null;
@@ -50,10 +52,12 @@ class InteractionSystem{
     const target = this.raycastTarget();
     this.currentHoverTarget = target;
     this._updatePrompt(target);
-    this.updateHeldKeyPose(dt || 0, elapsed || 0, !!moving);
+    if(this.positioning) this.updatePositioningPose();
+    else this.updateHeldKeyPose(dt || 0, elapsed || 0, !!moving);
   }
 
   _updatePrompt(target){
+    if(this.positioning){ this.ui.setPrompt(null); this.ui.setCrosshairHot(false); return; }
     if(!target){ this.ui.setPrompt(null); this.ui.setCrosshairHot(false); return; }
     let text = null;
     if(target.kind === 'key'){
@@ -68,13 +72,14 @@ class InteractionSystem{
   }
 
   interact(){
+    if(this.positioning) return; // only the drop control does anything while placing a key
     const target = this.currentHoverTarget;
     if(!target) return;
     this.audio.resume();
     if(target.kind === 'key'){
       const ku = this.world.keyUnits.get(target.id);
       if(!ku || (ku.state !== 'onTable' && ku.state !== 'dropped')) return;
-      if(this.heldKeyId) this.dropHeldKey();
+      if(this.heldKeyId) this._quickDropAtFeet();
       this.pickUpKey(target.id);
       return;
     }
@@ -108,8 +113,10 @@ class InteractionSystem{
     this.ui.setHeldKey(ku.data);
   }
 
-  // Physical keys can be set down anywhere — right at the player's feet.
-  dropHeldKey(){
+  // Used internally when the player picks up a different key while already
+  // holding one — a quick, undeliberate drop, distinct from the deliberate
+  // positioning flow below.
+  _quickDropAtFeet(){
     if(!this.heldKeyId) return;
     const ku = this.world.keyUnits.get(this.heldKeyId);
     const camPos = this.camera.position;
@@ -125,6 +132,70 @@ class InteractionSystem{
     this.heldKeyId = null;
     this.ui.setHeldKey(null);
     this.endInspect();
+    this.audio.keyReturn();
+  }
+
+  // The Drop control toggles a two-stage placement: press once to start
+  // aiming the key at a surface (table, tray, floor — anywhere in reach),
+  // press again to set it down exactly there. This is what makes the sorting
+  // table actually usable for organizing keys, rather than just dropping
+  // them wherever the player happens to be standing.
+  toggleDrop(){
+    if(!this.heldKeyId) return;
+    if(!this.positioning) this.startPositioning();
+    else this.confirmPlacement();
+  }
+
+  startPositioning(){
+    if(!this.heldKeyId) return;
+    const ku = this.world.keyUnits.get(this.heldKeyId);
+    if(ku.group.parent) ku.group.parent.remove(ku.group);
+    this.world.root.add(ku.group);
+    ku.carry = null;
+    this.positioning = true;
+    this.endInspect();
+    this.ui.setPositioning(true);
+    this.updatePositioningPose();
+  }
+
+  computePlacementPoint(){
+    this.raycaster.setFromCamera(this._center, this.camera);
+    const hits = this.raycaster.intersectObject(this.world.root, true);
+    if(hits.length){
+      const p = hits[0].point;
+      return { x:p.x, y:p.y+0.012, z:p.z };
+    }
+    // nothing in reach — project onto the floor along the view direction instead
+    const dir = new THREE.Vector3();
+    this.camera.getWorldDirection(dir);
+    const origin = this.camera.position;
+    let t = 1.4;
+    if(dir.y < -0.05) t = Utils.clamp((0.02 - origin.y) / dir.y, 0.3, 3.2);
+    const b = this.world.roomBounds;
+    return {
+      x: Utils.clamp(origin.x + dir.x*t, b.minX, b.maxX),
+      y: 0.012,
+      z: Utils.clamp(origin.z + dir.z*t, b.minZ, b.maxZ)
+    };
+  }
+
+  updatePositioningPose(){
+    if(!this.positioning || !this.heldKeyId) return;
+    const ku = this.world.keyUnits.get(this.heldKeyId);
+    const p = this.computePlacementPoint();
+    ku.group.position.set(p.x, p.y, p.z);
+    ku.group.rotation.set(-Math.PI/2, this.camera.rotation.y, 0);
+  }
+
+  confirmPlacement(){
+    if(!this.positioning || !this.heldKeyId) return;
+    const ku = this.world.keyUnits.get(this.heldKeyId);
+    ku.state = 'dropped';
+    ku.carry = null;
+    this.positioning = false;
+    this.heldKeyId = null;
+    this.ui.setHeldKey(null);
+    this.ui.setPositioning(false);
     this.audio.keyReturn();
   }
 
@@ -148,7 +219,6 @@ class InteractionSystem{
   _openBox(boxId){
     const bu = this.world.boxUnits.get(boxId);
     const ku = this.world.keyUnits.get(this.heldKeyId);
-    bu.state = 'open';
     ku.state = 'used';
     ku.carry = null;
     if(ku.group.parent) ku.group.parent.remove(ku.group);
@@ -190,7 +260,6 @@ class InteractionSystem{
     boxIdsInOrder.forEach((boxId, idx) => {
       const bu = this.world.boxUnits.get(boxId);
       if(!bu) return;
-      bu.state = 'open';
       this.world.openBoxVisual(boxId, { immediate:true });
       const ku = this.world.keyUnits.get(bu.data.keyId);
       if(ku){
@@ -206,11 +275,11 @@ class InteractionSystem{
     this.openedCount = boxIdsInOrder.length;
   }
 
-  isInspecting(){ return this.inspecting && !!this.heldKeyId; }
-  startInspect(){ if(this.heldKeyId){ this.inspecting = true; this.ui.setInspecting(true); } }
+  isInspecting(){ return this.inspecting && !!this.heldKeyId && !this.positioning; }
+  startInspect(){ if(this.heldKeyId && !this.positioning){ this.inspecting = true; this.ui.setInspecting(true); } }
   endInspect(){ this.inspecting = false; this.ui.setInspecting(false); }
   toggleInspect(){
-    if(!this.heldKeyId) return;
+    if(!this.heldKeyId || this.positioning) return;
     this.inspecting = !this.inspecting;
     this.ui.setInspecting(this.inspecting);
   }
