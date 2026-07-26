@@ -270,6 +270,7 @@
   #inspect-btn{ width:56px; height:56px; font-size:10.5px; letter-spacing:0.03em; text-transform:uppercase; }
   #inspect-btn.on{ background:rgba(200,150,90,0.65); color:var(--vault-ink); }
   #drop-btn{ width:50px; height:50px; font-size:10px; letter-spacing:0.03em; text-transform:uppercase; }
+  #drop-btn.on{ background:rgba(120,180,150,0.55); }
 
   /* ---------- inspect banner ---------- */
   #inspect-banner{
@@ -280,6 +281,15 @@
     opacity:0; transition:opacity 0.2s ease, transform 0.2s ease;
   }
   #inspect-banner.show{ opacity:1; transform:translate(-50%,0); }
+
+  #position-banner{
+    position:absolute; top:16px; left:50%; transform:translate(-50%,-8px);
+    padding:8px 18px; font-size:12px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase;
+    background:rgba(90,150,120,0.18); border:1px solid rgba(120,180,150,0.4); border-radius:16px;
+    color:#a8d8bc;
+    opacity:0; transition:opacity 0.2s ease, transform 0.2s ease;
+  }
+  #position-banner.show{ opacity:1; transform:translate(-50%,0); }
 
   #vignette{ position:absolute; inset:0; pointer-events:none; z-index:15;
     box-shadow:inset 0 0 160px 40px rgba(10,6,3,0.55);
