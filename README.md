@@ -94,8 +94,14 @@ regenerates with the settings it was created under, even if you change the defau
   "fingerprint" is globally unique, so there's always exactly one honest match — never an
   accidental coincidence.
 - **Keys are physical objects**, never UI icons. Picking one up reparents the real mesh to
-  the camera; it can be inspected, swayed while walking, dropped anywhere, and — when it
-  successfully opens something — stays visibly plugged into that lock rather than vanishing.
+  the camera; it can be inspected, swayed while walking, and — when it successfully opens
+  something — stays visibly plugged into that lock rather than vanishing.
+- **Placing a key is two steps, not one.** Press Drop once to start aiming (the key follows
+  wherever you're looking, raycasting against the room so it can rest on a tabletop, a tray,
+  or the floor); press Drop again to set it down exactly there. This is what makes the sorting
+  table actually useful — walk up, aim into a tray, place. There's also a separate empty
+  sorting table (distinct from the table the keys start on) with a few shallow trays, purely
+  for organizing keys into as you rule them out.
 - **No text clues anywhere in the HUD.** Prompts are single verbs (*Pick Up*, *Try Key*,
   *Locked*); the world communicates every clue.
 - **No native browser dialogs.** Resetting or starting a new vault goes through the in-page
