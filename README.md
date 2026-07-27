@@ -2,6 +2,11 @@
 
 A cozy, procedurally-generated first-person key-and-lock puzzle game. Built with plain JavaScript and Three.js — no build step, no bundler, no framework.
 
+> **Working on this project?** Start with `CLAUDE.md` — it covers the phase-by-phase
+> workflow this project follows, plus pointers to `roadmap.md` (what's next),
+> `history.md` (what's already been done), and `.claude/dev_notes.md` (gotchas worth
+> knowing before you touch things).
+
 ## Running it
 
 Open `index.html` in a browser. That's it.
@@ -20,20 +25,28 @@ Requires an internet connection on first load (Three.js and two Google Fonts loa
 
 ```
 the-vault/
+├── CLAUDE.md            Start here if you're working on this project
+├── roadmap.md           Future work, phase by phase
+├── history.md           What's been done, in roughly chronological order
+├── README.md            This file
+├── .claude/
+│   └── dev_notes.md     Known gotchas and hard-won lessons
 ├── index.html          HTML shell + all UI markup (HUD, modals, screens)
 ├── css/
 │   └── style.css       All styling — design tokens, layout, animations
-└── js/
-    ├── utils.js         Seeded RNG, easing/math helpers, the shared Tweens runner
-    ├── audio.js         AudioManager — every sound is synthesized, no audio files
-    ├── generator.js     Puzzle generation — clue dimensions, matching logic, rewards, settings schema
-    ├── textures.js       Every material is a canvas-drawn procedural texture
-    ├── world.js          VaultWorld — the room, furniture, box wall, containers
-    ├── player.js         First-person movement + input (desktop & mobile)
-    ├── interaction.js    Raycasting, physical key handling, unlock logic
-    ├── ui.js             HUD, prompts, modals, mobile control bindings
-    ├── save.js           SaveManager — IndexedDB persistence (localStorage fallback)
-    └── game.js           Bootstraps everything and runs the render loop
+├── js/
+│   ├── utils.js         Seeded RNG, easing/math helpers, the shared Tweens runner
+│   ├── audio.js         AudioManager — every sound is synthesized, no audio files
+│   ├── generator.js     Puzzle generation — clue dimensions, matching logic, rewards, settings schema
+│   ├── textures.js       Every material is a canvas-drawn procedural texture
+│   ├── world.js          VaultWorld — the room, furniture, box wall, containers
+│   ├── player.js         First-person movement + input (desktop & mobile)
+│   ├── interaction.js    Raycasting, physical key handling, unlock logic
+│   ├── ui.js             HUD, prompts, modals, mobile control bindings
+│   ├── save.js           SaveManager — IndexedDB persistence (localStorage fallback)
+│   └── game.js           Bootstraps everything and runs the render loop
+└── tests/               Offline logic/state tests — see tests/README.md for what they
+                         do and don't verify
 ```
 
 ### Load order matters
